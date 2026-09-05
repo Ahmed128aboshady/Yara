@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
-<html lang=ar dir=rtl>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset=UTF-8>
-  <meta name=viewport content=width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>يارا | Yara - Romantic Elevator</title>
-  <link rel=preconnect href=https://fonts.googleapis.com>
-  <link rel=preconnect href=https://fonts.gstatic.com crossorigin>
-  <link href=https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap rel=stylesheet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -25,7 +25,6 @@
       color: #ffffff;
     }
 
-    /* الحاوية الأساسية للشاشة بالكامل */
     .viewport-container {
       position: relative;
       width: 100vw;
@@ -38,7 +37,6 @@
       background: #000;
     }
 
-    /* الصورة الخلفية مع استجابة تلقائية */
     .bg-picture {
       position: absolute;
       inset: 0;
@@ -55,7 +53,6 @@
       display: block;
     }
 
-    /* تدرجات الظل والإضاءة للزجاج */
     .vignette-overlay {
       position: absolute;
       inset: 0;
@@ -64,7 +61,6 @@
       z-index: 2;
     }
 
-    /* كانفاس حركة البوكيه لمحاكاة نزول المصعد */
     #bokehCanvas {
       position: absolute;
       inset: 0;
@@ -74,7 +70,6 @@
       z-index: 5;
     }
 
-    /* لمعة زجاج المصعد */
     .glass-sheen {
       position: absolute;
       inset: 0;
@@ -83,7 +78,6 @@
       z-index: 6;
     }
 
-    /* الشريط العلوي */
     .header-bar {
       position: absolute;
       top: 0;
@@ -98,7 +92,6 @@
       z-index: 20;
     }
 
-    /* عداد الأدوار */
     .floor-badge {
       display: flex;
       align-items: center;
@@ -143,7 +136,6 @@
       border-radius: 4px;
     }
 
-    /* زر الموسيقى */
     .music-button {
       display: flex;
       align-items: center;
@@ -160,6 +152,7 @@
       box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
       backdrop-filter: blur(8px);
       transition: all 0.2s ease;
+      z-index: 30;
     }
 
     .music-button:active {
@@ -173,7 +166,6 @@
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
 
-    /* الشريط السفلي */
     .footer-bar {
       position: absolute;
       bottom: 0;
@@ -204,18 +196,17 @@
       color: rgba(255,255,255,0.4);
     }
 
-    /* واجهة تشغيل النغمة في المنتصف (Overlay) */
     .start-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 50;
       cursor: pointer;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.3s ease;
     }
 
     .start-card {
@@ -224,7 +215,7 @@
       border-radius: 24px;
       padding: 24px 32px;
       text-align: center;
-      box-shadow: 0 0 50px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.6);
       animation: pulse 2.5s infinite ease-in-out;
       max-width: 320px;
     }
@@ -257,7 +248,6 @@
       50% { transform: scale(1.03); box-shadow: 0 0 55px rgba(245, 158, 11, 0.8); }
     }
 
-    /* تحسينات الشاشات الصغيرة للموبايل */
     @media (max-width: 600px) {
       .header-bar {
         padding: 0 12px;
@@ -282,56 +272,47 @@
 </head>
 <body>
 
-  <!-- ملف الصوت الحقيقي MP3 -->
-  <audio id=bgMusic src=romantic_piano.mp3 loop preload=auto></audio>
+  <audio id="bgMusic" src="romantic_piano.mp3" loop preload="auto"></audio>
 
-  <div class=viewport-container>
+  <div class="viewport-container" id="appContainer">
 
-    <!-- الصورة الخلفية (متجاوبة تلقائياً: 9:16 للموبايل، 16:9 للشاشات الكبيرة) -->
-    <picture class=bg-picture>
-      <source media=(max-width: 768px) srcset=anime_elevator_mobile.jpg>
-      <img src=anime_elevator_romance.jpg alt=Yara - Romantic Elevator class=bg-image>
+    <picture class="bg-picture">
+      <source media="(max-width: 768px)" srcset="anime_elevator_mobile.jpg">
+      <img src="anime_elevator_romance.jpg" alt="Yara - Romantic Elevator" class="bg-image">
     </picture>
 
-    <!-- طبقات التدرج وانعكاس الزجاج -->
-    <div class=vignette-overlay></div>
-    <div class=glass-sheen></div>
+    <div class="vignette-overlay"></div>
+    <div class="glass-sheen"></div>
 
-    <!-- كانفاس البوكيه الصاعد -->
-    <canvas id=bokehCanvas></canvas>
+    <canvas id="bokehCanvas"></canvas>
 
-    <!-- الشريط العلوي -->
-    <header class=header-bar>
-      <!-- عداد الدور 16 صامت وبدون رنين -->
-      <div class=floor-badge>
-        <span class=arrow-down>▼</span>
-        <span class=floor-title>FLOOR</span>
-        <span id=floorNum class=floor-number>16</span>
-        <span class=floor-status>DESC</span>
+    <header class="header-bar">
+      <div class="floor-badge">
+        <span class="arrow-down">▼</span>
+        <span class="floor-title">FLOOR</span>
+        <span id="floorNum" class="floor-number">16</span>
+        <span class="floor-status">DESC</span>
       </div>
 
-      <!-- زر الموسيقى -->
-      <button id=musicBtn class=music-button onclick=toggleAudio()>
-        <span id=musicIcon>▶️</span>
-        <span id=musicLabel>تشغيل النغمة</span>
+      <button id="musicBtn" class="music-button" type="button">
+        <span id="musicIcon">▶️</span>
+        <span id="musicLabel">تشغيل النغمة</span>
       </button>
     </header>
 
-    <!-- واجهة البداية للتشغيل الفوري للموسيقى -->
-    <div id=startAudioOverlay class=start-overlay onclick=toggleAudio()>
-      <div class=start-card>
-        <div class=start-icon>🎹</div>
-        <h3 class=start-title>اضغط لتشغيل النغمة الهادئة</h3>
-        <p class=start-desc>معزوفة بيانو رومانسية دافئة<br>(Clair de Lune)</p>
+    <div id="startAudioOverlay" class="start-overlay">
+      <div class="start-card">
+        <div class="start-icon">🎹</div>
+        <h3 class="start-title">اضغط لتشغيل النغمة الهادئة</h3>
+        <p class="start-desc">معزوفة بيانو رومانسية دافئة<br>(Clair de Lune)</p>
       </div>
     </div>
 
-    <!-- الشريط السفلي الشاعري -->
-    <footer class=footer-bar>
-      <p class=footer-quote>
-        وبين صمت النزول وازدحام المشاعر.. كان كلٌّ منهما ينظر بعيداً، والقلب يلتفت للداخل.
+    <footer class="footer-bar">
+      <p class="footer-quote">
+        "وبين صمت النزول وازدحام المشاعر.. كان كلٌّ منهما ينظر بعيداً، والقلب يلتفت للداخل."
       </p>
-      <div class=footer-meta>
+      <div class="footer-meta">
         <span>YARA • PANORAMIC LIFT</span>
         <span>STARTING FROM FLOOR 16</span>
         <span>ROMANTIC PIANO</span>
@@ -341,7 +322,7 @@
   </div>
 
   <script>
-    // 1. حركة أضواء وبوكيه المدينة الصاعدة في الخلفية
+    // 1. حركة أضواء وبوكيه المدينة
     const canvas = document.getElementById('bokehCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -387,7 +368,7 @@
     }
     renderBokeh();
 
-    // 2. عداد الأدوار يبدأ من 16 بصمت وبدون أي رنين
+    // 2. عداد الأدوار يبدأ من 16
     let floor = 16;
     const floorEl = document.getElementById('floorNum');
     setInterval(() => {
@@ -396,47 +377,68 @@
       floorEl.textContent = floor < 10 ? '0' + floor : floor;
     }, 4500);
 
-    // 3. تشغيل ملف الصوت الحقيقي MP3
+    // 3. التحكم بالصوت
     const audio = document.getElementById('bgMusic');
-    audio.volume = 0.9;
+    const btn = document.getElementById('musicBtn');
+    const lbl = document.getElementById('musicLabel');
+    const icon = document.getElementById('musicIcon');
+    const overlay = document.getElementById('startAudioOverlay');
+
     let isPlaying = false;
 
-    function toggleAudio() {
-      const btn = document.getElementById('musicBtn');
-      const lbl = document.getElementById('musicLabel');
-      const icon = document.getElementById('musicIcon');
-      const overlay = document.getElementById('startAudioOverlay');
-
+    function playAudio() {
       if (overlay) {
         overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 400);
+        setTimeout(() => {
+          overlay.style.display = 'none';
+        }, 300);
       }
 
+      audio.play().then(() => {
+        isPlaying = true;
+        lbl.textContent = 'إيقاف النغمة';
+        icon.textContent = '⏸️';
+        btn.classList.add('playing');
+      }).catch(err => {
+        console.warn('Playback error:', err);
+      });
+    }
+
+    function pauseAudio() {
+      audio.pause();
+      isPlaying = false;
+      lbl.textContent = 'تشغيل النغمة';
+      icon.textContent = '▶️';
+      btn.classList.remove('playing');
+    }
+
+    function toggleAudio(e) {
+      if (e) e.stopPropagation();
       if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-        lbl.textContent = تشغيل النغمة;
-        icon.textContent = ▶️;
-        btn.classList.remove('playing');
+        pauseAudio();
       } else {
-        const promise = audio.play();
-        if (promise !== undefined) {
-          promise.then(() => {
-            isPlaying = true;
-            lbl.textContent = إيقاف النغمة;
-            icon.textContent = ⏸️;
-            btn.classList.add('playing');
-          }).catch(err => {
-            console.log(Audio play prevented:, err);
-          });
-        }
+        playAudio();
       }
     }
 
-    // تشغيل تلقائي بمجرد النقر في أي مكان في الصفحة
-    window.addEventListener('click', function firstClick() {
+    // ربط الأحداث بدقة
+    if (overlay) {
+      overlay.addEventListener('click', function(e) {
+        playAudio();
+      });
+      overlay.addEventListener('touchstart', function(e) {
+        playAudio();
+      }, { passive: true });
+    }
+
+    if (btn) {
+      btn.addEventListener('click', toggleAudio);
+    }
+
+    // تشغيل عند النقر في أي مكان
+    document.addEventListener('click', function globalClick() {
       if (!isPlaying) {
-        toggleAudio();
+        playAudio();
       }
     }, { once: true });
   </script>
