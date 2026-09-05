@@ -4,134 +4,350 @@
   <meta charset=UTF-8>
   <meta name=viewport content=width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover>
   <title>يارا | Yara - Romantic Elevator</title>
-  <script src=https://cdn.tailwindcss.com></script>
   <link rel=preconnect href=https://fonts.googleapis.com>
   <link rel=preconnect href=https://fonts.gstatic.com crossorigin>
   <link href=https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap rel=stylesheet>
   <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      user-select: none;
-      overflow: hidden;
-      background: #06070d;
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100vh;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000000;
+      font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      color: #ffffff;
+    }
+
+    /* الحاوية الأساسية للشاشة بالكامل */
+    .viewport-container {
+      position: relative;
       width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
     }
 
-    @keyframes elevatorSway {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(3px); }
-    }
-    @keyframes blinkArrow {
-      0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.8)); }
-      50% { opacity: 0.2; filter: none; }
-    }
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.35; }
-      50% { opacity: 0.7; }
-    }
-    @keyframes musicPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
-      50% { transform: scale(1.04); box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); }
+    /* الصورة الخلفية مع استجابة تلقائية */
+    .bg-picture {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
     }
 
-    .elevator-frame {
-      animation: elevatorSway 6s ease-in-out infinite;
+    .bg-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
-    .blink {
-      animation: blinkArrow 1.2s infinite ease-in-out;
+
+    /* تدرجات الظل والإضاءة للزجاج */
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+      pointer-events-none;
+      z-index: 2;
     }
-    .ambient-glow {
-      animation: pulseGlow 4s ease-in-out infinite;
+
+    /* كانفاس حركة البوكيه لمحاكاة نزول المصعد */
+    #bokehCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events-none;
+      z-index: 5;
     }
-    .music-cta {
-      animation: musicPulse 2.5s infinite ease-in-out;
+
+    /* لمعة زجاج المصعد */
+    .glass-sheen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, rgba(255,255,255,0.06) 0%, transparent 35%, rgba(255,255,255,0.02) 65%, transparent 100%);
+      pointer-events-none;
+      z-index: 6;
+    }
+
+    /* الشريط العلوي */
+    .header-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+      z-index: 20;
+    }
+
+    /* عداد الأدوار */
+    .floor-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 12, 18, 0.85);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+    }
+
+    .arrow-down {
+      color: #f59e0b;
+      font-size: 14px;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+
+    .floor-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .floor-number {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #f59e0b;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .floor-status {
+      font-size: 9px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(6, 78, 59, 0.7);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* زر الموسيقى */
+    .music-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 158, 11, 0.25);
+      border: 1.5px solid #f59e0b;
+      color: #fef3c7;
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .music-button:active {
+      transform: scale(0.96);
+    }
+
+    .music-button.playing {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #10b981;
+      color: #a7f3d0;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* الشريط السفلي */
+    .footer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 30px 20px 18px;
+      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+      text-align: center;
+      z-index: 20;
+    }
+
+    .footer-quote {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fef3c7;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .footer-meta {
+      display: flex;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 10px;
+      font-family: monospace;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* واجهة تشغيل النغمة في المنتصف (Overlay) */
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      cursor: pointer;
+      transition: opacity 0.4s ease;
+    }
+
+    .start-card {
+      background: linear-gradient(180deg, rgba(30, 20, 15, 0.95) 0%, rgba(10, 8, 12, 0.98) 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 24px;
+      padding: 24px 32px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.5);
+      animation: pulse 2.5s infinite ease-in-out;
+      max-width: 320px;
+    }
+
+    .start-icon {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .start-title {
+      color: #fef3c7;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .start-desc {
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(245, 158, 11, 0.4); }
+      50% { transform: scale(1.03); box-shadow: 0 0 55px rgba(245, 158, 11, 0.8); }
+    }
+
+    /* تحسينات الشاشات الصغيرة للموبايل */
+    @media (max-width: 600px) {
+      .header-bar {
+        padding: 0 12px;
+        height: 60px;
+      }
+      .floor-badge {
+        padding: 4px 10px;
+        gap: 6px;
+      }
+      .floor-number {
+        font-size: 15px;
+      }
+      .music-button {
+        padding: 6px 14px;
+        font-size: 11px;
+      }
+      .footer-quote {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
-<body class=h-screen w-screen flex items-center justify-center bg-[#05060b] text-white sm:p-4>
+<body>
 
-  <!-- عنصر الصوت الحقيقي MP3 لتشغيل النغمة الهادئة بموثوقية 100% -->
+  <!-- ملف الصوت الحقيقي MP3 -->
   <audio id=bgMusic src=romantic_piano.mp3 loop preload=auto></audio>
 
-  <!-- إطار المصعد البانورامي الزجاجي -->
-  <div class=relative z-10 w-full h-full sm:h-[90vh] sm:max-w-[1100px] sm:max-h-[820px] sm:rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.95)] sm:border sm:border-white/20 flex flex-col elevator-frame bg-black>
-    
-    <!-- خلفية المصعد البانورامي (الصورة الأنمي الرومانسية المتجاوبة) -->
-    <div class=absolute inset-0 z-0>
-      <picture class=w-full h-full block>
-        <source media=(max-width: 640px) srcset=anime_elevator_mobile.jpg>
-        <img src=anime_elevator_romance.jpg 
-             alt=Yara - Anime Panoramic Elevator Romance 
-             class=w-full h-full object-cover object-center>
-      </picture>
+  <div class=viewport-container>
 
-      <div class=absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/60 pointer-events-none></div>
-      <div class=absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,200,140,0.25)_0%,transparent_60%)] pointer-events-none ambient-glow></div>
-    </div>
+    <!-- الصورة الخلفية (متجاوبة تلقائياً: 9:16 للموبايل، 16:9 للشاشات الكبيرة) -->
+    <picture class=bg-picture>
+      <source media=(max-width: 768px) srcset=anime_elevator_mobile.jpg>
+      <img src=anime_elevator_romance.jpg alt=Yara - Romantic Elevator class=bg-image>
+    </picture>
 
-    <!-- كانفاس حركة أضواء وبوكيه المدينة الصاعدة -->
-    <canvas id=bokehCanvas class=absolute inset-0 z-10 pointer-events-none w-full h-full></canvas>
+    <!-- طبقات التدرج وانعكاس الزجاج -->
+    <div class=vignette-overlay></div>
+    <div class=glass-sheen></div>
 
-    <!-- لمعات وانعكاسات زجاج المصعد -->
-    <div class=absolute inset-0 z-15 pointer-events-none bg-[linear-gradient(115deg,rgba(255,255,255,0.06)_0%,transparent_30%,rgba(255,255,255,0.03)_60%,transparent_100%)]></div>
+    <!-- كانفاس البوكيه الصاعد -->
+    <canvas id=bokehCanvas></canvas>
 
     <!-- الشريط العلوي -->
-    <div class=relative z-20 w-full pt-3 pb-2 px-3 sm:px-8 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between border-b border-white/10 backdrop-blur-sm gap-2>
-      
-      <!-- مؤشر النزول يبدأ من الدور 16 صامتاً بدون صوت رنين -->
-      <div class=flex items-center gap-1.5 sm:gap-3 bg-black/75 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-amber-500/40 backdrop-blur-md shadow-md shrink-0>
-        <span class=text-amber-400 font-bold text-xs sm:text-base blink>▼</span>
-        <span class=text-[9px] sm:text-xs uppercase tracking-wider text-white/70 font-semibold>FLOOR</span>
-        <span id=floorNum class=text-amber-400 font-mono font-bold text-sm sm:text-xl tracking-wider>16</span>
-        <span class=text-emerald-400 text-[8px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/30>DESCENDING</span>
+    <header class=header-bar>
+      <!-- عداد الدور 16 صامت وبدون رنين -->
+      <div class=floor-badge>
+        <span class=arrow-down>▼</span>
+        <span class=floor-title>FLOOR</span>
+        <span id=floorNum class=floor-number>16</span>
+        <span class=floor-status>DESC</span>
       </div>
 
-      <!-- زر الموسيقى الرومانسية الهادئة -->
-      <div class=flex items-center gap-2 shrink-0>
-        <button id=musicBtn onclick=toggleAudio() class=px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full bg-amber-500/30 hover:bg-amber-500/50 border border-amber-400 text-xs sm:text-sm text-amber-100 font-semibold flex items-center gap-2 transition-all shadow-lg active:scale-95>
-          <span id=musicIcon class=text-base>▶️</span>
-          <span id=musicLabel>تشغيل النغمة الهادئة</span>
-        </button>
-      </div>
+      <!-- زر الموسيقى -->
+      <button id=musicBtn class=music-button onclick=toggleAudio()>
+        <span id=musicIcon>▶️</span>
+        <span id=musicLabel>تشغيل النغمة</span>
+      </button>
+    </header>
 
-    </div>
-
-    <!-- رسالة ترحيبية بالمنتصف لتشغيل النغمة الرومانسية فورياً -->
-    <div id=startAudioOverlay onclick=toggleAudio() class=absolute inset-0 z-30 bg-black/40 backdrop-blur-[2px] flex items-center justify-center cursor-pointer transition-opacity duration-500>
-      <div class=bg-gradient-to-b from-amber-950/90 to-black/95 border-2 border-amber-400/80 rounded-2xl px-6 py-4 text-center max-w-xs shadow-[0_0_40px_rgba(245,158,11,0.5)] music-cta>
-        <div class=text-3xl mb-2>🎹</div>
-        <h3 class=text-amber-200 font-bold text-base mb-1>اضغط لتشغيل النغمة الهادئة</h3>
-        <p class=text-white/80 text-xs leading-relaxed>معزوفة بيانو رومانسية دافئة (Clair de Lune - Piano)</p>
+    <!-- واجهة البداية للتشغيل الفوري للموسيقى -->
+    <div id=startAudioOverlay class=start-overlay onclick=toggleAudio()>
+      <div class=start-card>
+        <div class=start-icon>🎹</div>
+        <h3 class=start-title>اضغط لتشغيل النغمة الهادئة</h3>
+        <p class=start-desc>معزوفة بيانو رومانسية دافئة<br>(Clair de Lune)</p>
       </div>
     </div>
 
-    <!-- مساحة المنتصف المرئية -->
-    <div class=relative z-20 flex-1 pointer-events-none></div>
-
-    <!-- الشريط السفلي -->
-    <div class=relative z-20 w-full bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-3 pb-3 sm:pt-6 sm:pb-4 px-3 sm:px-8 border-t border-white/10 backdrop-blur-sm flex flex-col items-center justify-center text-center>
-      <p class=text-xs sm:text-base font-medium text-amber-100/95 tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-relaxed max-w-[95%]>
+    <!-- الشريط السفلي الشاعري -->
+    <footer class=footer-bar>
+      <p class=footer-quote>
         وبين صمت النزول وازدحام المشاعر.. كان كلٌّ منهما ينظر بعيداً، والقلب يلتفت للداخل.
       </p>
-      <div class=flex items-center justify-between w-full mt-1.5 sm:mt-2 text-[9px] sm:text-xs text-white/45 font-mono>
+      <div class=footer-meta>
         <span>YARA • PANORAMIC LIFT</span>
         <span>STARTING FROM FLOOR 16</span>
-        <span>ROMANTIC PIANO MELODY</span>
+        <span>ROMANTIC PIANO</span>
       </div>
-    </div>
+    </footer>
 
   </div>
 
   <script>
-    // 1. حركة أضواء وبوكيه المدينة
+    // 1. حركة أضواء وبوكيه المدينة الصاعدة في الخلفية
     const canvas = document.getElementById('bokehCanvas');
     const ctx = canvas.getContext('2d');
+
     function resize() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize);
     resize();
@@ -140,8 +356,8 @@
     const colors = ['#f59e0b', '#fbbf24', '#38bdf8', '#c084fc', '#f43f5e', '#ffffff'];
     for (let i = 0; i < 50; i++) {
       particles.push({
-        x: Math.random() * (window.innerWidth || 400),
-        y: Math.random() * (window.innerHeight || 700),
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
         r: Math.random() * 3 + 1,
         speed: Math.random() * 1.8 + 0.8,
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -171,7 +387,7 @@
     }
     renderBokeh();
 
-    // 2. عداد الأدوار يبدأ من 16 بدون أي رنين
+    // 2. عداد الأدوار يبدأ من 16 بصمت وبدون أي رنين
     let floor = 16;
     const floorEl = document.getElementById('floorNum');
     setInterval(() => {
@@ -180,9 +396,9 @@
       floorEl.textContent = floor < 10 ? '0' + floor : floor;
     }, 4500);
 
-    // 3. النغمة الرومانسية الحقيقية (HTML5 Audio MP3)
+    // 3. تشغيل ملف الصوت الحقيقي MP3
     const audio = document.getElementById('bgMusic');
-    audio.volume = 0.85;
+    audio.volume = 0.9;
     let isPlaying = false;
 
     function toggleAudio() {
@@ -199,28 +415,26 @@
       if (isPlaying) {
         audio.pause();
         isPlaying = false;
-        lbl.textContent = تشغيل النغمة الهادئة;
+        lbl.textContent = تشغيل النغمة;
         icon.textContent = ▶️;
-        btn.classList.remove('bg-emerald-500/40', 'border-emerald-400');
-        btn.classList.add('bg-amber-500/30', 'border-amber-400');
+        btn.classList.remove('playing');
       } else {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
+        const promise = audio.play();
+        if (promise !== undefined) {
+          promise.then(() => {
             isPlaying = true;
             lbl.textContent = إيقاف النغمة;
             icon.textContent = ⏸️;
-            btn.classList.add('bg-emerald-500/40', 'border-emerald-400');
-            btn.classList.remove('bg-amber-500/30', 'border-amber-400');
+            btn.classList.add('playing');
           }).catch(err => {
-            console.log(Autoplay was prevented:, err);
+            console.log(Audio play prevented:, err);
           });
         }
       }
     }
 
-    // تشغيل فوري بمجرد النقر في أي مكان في الصفحة
-    window.addEventListener('click', function onFirstClick() {
+    // تشغيل تلقائي بمجرد النقر في أي مكان في الصفحة
+    window.addEventListener('click', function firstClick() {
       if (!isPlaying) {
         toggleAudio();
       }
