@@ -56,7 +56,7 @@
     .vignette-overlay {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+      background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.5) 100%);
       pointer-events-none;
       z-index: 2;
     }
@@ -166,36 +166,6 @@
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
 
-    .footer-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 30px 20px 18px;
-      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
-      text-align: center;
-      z-index: 20;
-    }
-
-    .footer-quote {
-      font-size: 14px;
-      font-weight: 600;
-      color: #fef3c7;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-      margin-bottom: 6px;
-      line-height: 1.5;
-    }
-
-    .footer-meta {
-      display: flex;
-      justify-content: space-between;
-      max-width: 600px;
-      margin: 0 auto;
-      font-size: 10px;
-      font-family: monospace;
-      color: rgba(255,255,255,0.4);
-    }
-
     .start-overlay {
       position: absolute;
       inset: 0;
@@ -264,9 +234,6 @@
         padding: 6px 14px;
         font-size: 11px;
       }
-      .footer-quote {
-        font-size: 12px;
-      }
     }
   </style>
 </head>
@@ -307,17 +274,6 @@
         <p class="start-desc">معزوفة بيانو رومانسية دافئة<br>(Clair de Lune)</p>
       </div>
     </div>
-
-    <footer class="footer-bar">
-      <p class="footer-quote">
-        "وبين صمت النزول وازدحام المشاعر.. كان كلٌّ منهما ينظر بعيداً، والقلب يلتفت للداخل."
-      </p>
-      <div class="footer-meta">
-        <span>YARA • PANORAMIC LIFT</span>
-        <span>STARTING FROM FLOOR 16</span>
-        <span>ROMANTIC PIANO</span>
-      </div>
-    </footer>
 
   </div>
 
@@ -421,7 +377,6 @@
       }
     }
 
-    // ربط الأحداث بدقة
     if (overlay) {
       overlay.addEventListener('click', function(e) {
         playAudio();
@@ -435,7 +390,6 @@
       btn.addEventListener('click', toggleAudio);
     }
 
-    // تشغيل عند النقر في أي مكان
     document.addEventListener('click', function globalClick() {
       if (!isPlaying) {
         playAudio();
